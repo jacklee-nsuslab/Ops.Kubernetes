@@ -1,0 +1,23 @@
+apiVersion: v1
+clusters:
+- cluster:
+    server: ""
+  name: idc-tw1-prod
+- cluster:
+    server: ""
+  name: idc-tw1-stage
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://dev-master.k8s.nsuslab.io
+  name: seoul-office-dev
+contexts:
+- context:
+    cluster: seoul-office-dev
+    namespace: dev
+    user: developer
+  name: develop
+current-context: develop
+kind: Config
+preferences: {}
+users:
+- name: developer
