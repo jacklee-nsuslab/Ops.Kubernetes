@@ -89,7 +89,6 @@ apiEndpoints:
 #    # Explicitly set to an empty array to completely disable it.
 #    # If you do that, probably you would like to set securityGroupIds to provide this load balancer an existing SG with a Kubernetes API access allowed from specific ranges.
 #    apiAccessAllowedSourceCIDRs:
-
 #    #- 0.0.0.0/0
 #
 #    # Existing security groups attached to this load balancer which are typically used to
@@ -145,7 +144,7 @@ sshAuthorizedKeys:
 region: ap-northeast-1
 
 # Availability Zone to provision Kubernetes cluster when placing nodes in a single availability zone (not highly-available) Comment out for multi availability zone setting and use the below `subnets` section instead.
-#availabilityZone: ap-northeast-1a
+availabilityZone: ap-northeast-1a
 
 # ARN of the KMS key used to encrypt TLS assets.
 kmsKeyArn: "arn:aws:kms:ap-northeast-1:902098765056:key/9a5aacca-6b6a-4a8d-b0c4-f7d0dc938cc3"
@@ -388,10 +387,10 @@ worker:
 #        maxBatchSize: 1
 #
 #      # Auto Scaling Group definition for workers. If only `workerCount` is specified, min and max will be the set to that value and `rollingUpdateMinInstancesInService` will be one less.
-      autoScalingGroup:
-        minSize: 1
-        maxSize: 3
-        rollingUpdateMinInstancesInService: 1
+#      autoScalingGroup:
+#        minSize: 1
+#        maxSize: 3
+#        rollingUpdateMinInstancesInService: 2
 #
 #      #
 #      # Spot fleet config for worker nodes
@@ -452,13 +451,13 @@ worker:
 #      #
 #
 #      # Autoscaling by adding/removing nodes according to resource usage
-      autoscaling:
+#      autoscaling:
 #        # Make this node pool an autoscaling-target of k8s cluster-autoscaler
 #        #
 #        # Beware that making this an autoscaing-target doesn't automatically deploy cluster-autoscaler itself -
 #        # turn on `addons.clusterAutoscaler.enabled` to deploy it on controller nodes.
-        clusterAutoscaler:
-          enabled: false
+#        clusterAutoscaler:
+#          enabled: true
 #
 #      # Used to provide `/etc/environment` env vars with values from arbitrary CloudFormation refs
 #      awsEnvironment:
@@ -736,9 +735,9 @@ worker:
 # CAUTION: Deprecated and will be removed in v0.9.9. Please use vpc.id instead
 # vpcId:
 
-vpc:
+#vpc:
 #  # ID of existing VPC to create subnet in. Leave blank to create a new VPC
-  id: vpc-099a6ef473a9f8888
+#  id:
 #  # Exported output's name from another stack
 #  # Only specify either id or idFromStackOutput but not both
 #  #idFromStackOutput: myinfra-Vpc
@@ -748,7 +747,7 @@ vpc:
 
 #internetGateway:
 #  # ID of existing Internet Gateway to associate subnet with. Leave blank to create a new Internet Gateway
-#  #id: igw-05f25d183e5df1148
+#  id:
 #  # Exported output's name from another stack
 #  # Only specify either id or idFromStackOutput but not both
 #  #idFromStackOutput: myinfra-igw
@@ -767,17 +766,17 @@ vpc:
 # * If you like to make all the subnets public, pre-configure an IGW yourself and add a route to the IGW beforehand
 # * If you like to mix private and public subnets, omit routeTableId but specify subnets[].routeTable.id per subnet
 #
-# routeTableId: rtb-032a8c3044df8edab
+# routeTableId: rtb-xxxxxxxx
 
 # CIDR for Kubernetes VPC. If vpcId is specified, must match the CIDR of existing vpc.
-vpcCIDR: "10.19.0.0/16"
+vpcCIDR: "10.15.0.0/16"
 
 # CIDR for Kubernetes subnet when placing nodes in a single availability zone (not highly-available) Leave commented out for multi availability zone setting and use the below `subnets` section instead.
-# instanceCIDR: "10.0.0.0/24"
+instanceCIDR: "10.15.0.0/16"
 
 # Kubernetes subnets with their CIDRs and availability zones.
 # Differentiating availability zone for 2 or more subnets result in high-availability (failures of a single availability zone won't result in immediate downtimes)
-subnets:
+#subnets:
 #   #
 #   # Managed public subnet managed by kube-aws
 #   #
@@ -790,36 +789,6 @@ subnets:
 #   #
 #   # Managed private subnet managed by kube-aws
 #   #
-  - name: kube-stage-subnet-i-a1
-    private: false
-    availabilityZone: ap-northeast-1a
-    instanceCIDR: "10.19.99.0/24"
-    routeTable:
-      id: "rtb-03de8b0c7abb084e6"
-  - name: kube-stage-subnet-i-c1
-    private: false
-    availabilityZone: ap-northeast-1c
-    instanceCIDR: "10.19.97.0/24"
-    routeTable:
-      id: "rtb-03de8b0c7abb084e6"
-  - name: kube-stage-subnet-a1
-    private: true
-    availabilityZone: ap-northeast-1a
-    instanceCIDR: "10.19.11.0/24"
-    routeTable:
-      id: "rtb-032a8c3044df8edab"
-  - name: kube-stage-subnet-c1
-    private: true
-    availabilityZone: ap-northeast-1c
-    instanceCIDR: "10.19.13.0/24"
-    routeTable:
-      id: "rtb-0f8726bb4e7dceb02"
-  - name: kube-stage-subnet-d1
-    private: true
-    availabilityZone: ap-northeast-1d
-    instanceCIDR: "10.19.14.0/24"
-    routeTable:
-      id: "rtb-0ffe571a069a001da"
 #
 #   #
 #   # Advanced: Unmanaged/existing public subnet reused but not managed by kube-aws
@@ -978,7 +947,7 @@ subnets:
 # and pulling from quay or dockerhub is slow and you get many timeouts.
 
 # Version of hyperkube image to use. This is the tag for the hyperkube image repository.
-kubernetesVersion: v1.10.4
+# kubernetesVersion: v1.9.3
 
 # Hyperkube image repository to use.
 # hyperkubeImage:
@@ -1126,7 +1095,7 @@ kubernetes:
 # When enabled nodes no longer need to connect etcd and frees up node podCIDR leases faster resolving issue: 
 # https://github.com/coreos/flannel/issues/954.
 # 
-# Consider enabling Typha if you have 50+ nodes in your cluster. Without Typha, the load on the API server and Felix’s CPU usage
+# Consider enabling Typha if you have 50+ nodes in your cluster. Without Typha, the load on the API server and Felix???CPU usage
 # increases substantially as the number of nodes is increased.  The legacy top-level 'useCalico' setting has no effect with selfHosting
 # enabled - use type 'canal' for calico+flannel.
 # 
@@ -1144,8 +1113,8 @@ kubernetes:
 # ISSUES3 - Rolling back to old networking will require all nodes are cycled/rolled and the network is disrupted throughout.
 #
       enabled: true   # enable self-hosting
-      type: canal      # either "canal" or "flannel"
-      typha: false     # enable for type 'canal' for large clusters
+#      type: canal      # either "canal" or "flannel"
+#      typha: false     # enable for type 'canal' for large clusters
 #      calicoNodeImage:
 #        repo: quay.io/calico/node
 #        tag: v3.0.3
@@ -1191,7 +1160,7 @@ kubernetes:
 #sharedPersistentVolume: false
 
 # Determines the container runtime for kubernetes to use. Accepts 'docker' or 'rkt'.
-containerRuntime: docker
+# containerRuntime: docker
 
 # If you do not want kube-aws to manage certificaes, set it to false. If you do that
 # you are responsible for making sure that nodes have correct certificates by the time
@@ -1206,8 +1175,8 @@ containerRuntime: docker
 
 # Autosaves all Kubernetes resources (in .json format) to a bucket 's3:.../<your-cluster-name>/backup/*'.
 # The autosave process executes on start-up and repeats every 24 hours.
-kubeResourcesAutosave:
-  enabled: true
+#kubeResourcesAutosave:
+#  enabled: false
 
 # Accessing Dashboard:
 # By default, the kubernetes dashboard has admin privileges and doesn't require authentication.
@@ -1289,7 +1258,7 @@ addons:
 
   # Metrics Server (https://github.com/kubernetes-incubator/metrics-server)
   metricsServer:
-    enabled: true
+    enabled: false
 
   # When set to true this configures security groups for prometheus between nodes.
   # This includes the following ports: 10252, 10251, 10250, 9100, and 4194
@@ -1386,9 +1355,9 @@ experimental:
   # For using Dex as a custom OIDC provider, please check "contrib/dex/README.md".
   # WARNING: always use "https" for "issuerUrl", otherwise the Kubernetes API server will not start correctly.
   oidc:
-    enabled: true
+    enabled: false
     issuerUrl: "https://accounts.google.com"
-    clientId: "299071600443-nmj6cn9mo07f6p1ql04pea3p5nd3mokf.apps.googleusercontent.com"
+    clientId: "kubernetes"
     usernameClaim: "email"
     groupsClaim: "groups"
 
